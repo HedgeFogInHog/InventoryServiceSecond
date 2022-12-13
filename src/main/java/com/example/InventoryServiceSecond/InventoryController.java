@@ -33,8 +33,8 @@ public class InventoryController {
     }
 
     @GetMapping("/buy")
-    public void buy(@RequestParam String name, int amount, double price) throws SQLException {
-        service.buy(new Inventory(-1, name, amount), price);
+    public void buy(@RequestParam String name, int amount, double price, int BranchOfficeId) throws SQLException {
+        service.buy(new Inventory(-1, name, amount, BranchOfficeId), price);
     }
 
     @GetMapping("/decrease")

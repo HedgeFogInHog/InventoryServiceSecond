@@ -15,9 +15,9 @@ import java.util.HashMap;
 
 @Service
 public class InventoryService {
-    static final int budgetPort = 8000;
+    static final int BranchPort = 3512;
     static final String serverName = "WINDOWS-CQ7O1HH";
-    static final String dbName = "momento_mori";
+    static final String dbName = "memento_mori";
     static final String url = "jdbc:sqlserver://" + serverName + ";database=" + dbName + ";encrypt=true;trustServerCertificate=true;";
     public final String user = "erki";
     public final String password = "abcdefg";
@@ -43,7 +43,7 @@ public class InventoryService {
             return null;
         }
 
-        var value = new Inventory(result.getInt(1), result.getString(2),result.getInt(3));
+        var value = new Inventory(result.getInt(1), result.getString(2),result.getInt(3),result.getInt(4));
 
         connection.close();
 
@@ -64,7 +64,7 @@ public class InventoryService {
         var results = new ArrayList<Inventory>();
 
         while (result.next()){
-            results.add(new Inventory(result.getInt(1), result.getString("name"),result.getInt("amount")));
+            results.add(new Inventory(result.getInt(1), result.getString("Name"),result.getInt("Amount"), result.getInt("BranchOfficeId")));
         }
         connection.close();
 
@@ -75,12 +75,13 @@ public class InventoryService {
         Connection connection = DriverManager.getConnection(url, user, password);
 
         String sql = """ 
-                INSERT INTO dbo.Inventory VALUES (?,?)""";
+                INSERT INTO dbo.Inventory VALUES (?,?,?)""";
 
         var prst = connection.prepareStatement(sql);
 
         prst.setString(1, inventory.getName());
         prst.setInt(2, inventory.getAmount());
+        prst.setInt(3, inventory.getBranchOfficeId());
 
 
         prst.execute();
@@ -89,8 +90,9 @@ public class InventoryService {
 
 
         var rest = restTemplateBuilder.build();
-        var urlBuilder = UriComponentsBuilder.fromHttpUrl("http://localhost:"+budgetPort+"/budget/income")
-                .queryParam("moneyAmount", price*inventory.getAmount())
+        var urlBuilder = UriComponentsBuilder.fromHttpUrl("http://localhost:"+BranchPort+"/office/change-to")
+                .queryParam("id", inventory.getBranchOfficeId())
+                .queryParam("budget", -price*inventory.getAmount())
                 .queryParam("description", "Bought "+ inventory.getName());
         var query = urlBuilder.build().toUri().toString();
 
